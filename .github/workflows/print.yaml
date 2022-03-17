@@ -1,0 +1,8 @@
+name: Prints
+on: [push]
+jobs:
+  echo-name:
+    runs-on: ubuntu:latest
+    steps:
+      - name: print
+        run: echo "Bem vindos ao github actions"
