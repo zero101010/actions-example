@@ -1,0 +1,55 @@
+name: deploy Image
+on: [push]
+jobs:
+  install:
+    runs-on: ubuntu:latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12'
+      - run: npm install
+      - name: Cache meu node-modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: node_modules
+          key: learn-${{github.sha}}
+  test:
+    runs-on: ubuntu:latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12'
+      - name: Cache meu node-modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: node_modules
+          key: learn-${{github.sha}}
+      - run: npm run test  
+  release:
+    runs-on: ubuntu:latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache meu node-modules
+       uses: actions/cache@v2
+       env:
+         cache-name: cache-node-modules
+       with:
+         path: node_modules
+         key: learn-${{github.sha}}
+      - name: Docker push to dockerhub
+        env:
+          DOCKER_USER: ${{secrets.DOCKER_USERNAME}}
+          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+          IMAGE: zero101010/example-actions:${{github.sha}}
+        run: |
+          docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+          docker build -t $IMAGE
+          docker push $IMAGE
